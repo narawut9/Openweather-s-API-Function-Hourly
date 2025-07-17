@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.log
+
+# Environment
+.env
+.env.*
+venv/
+.venv/
+
+# VS Code
+.vscode/
+
+main.py
+database_manager.py
+openweather_daily.py
