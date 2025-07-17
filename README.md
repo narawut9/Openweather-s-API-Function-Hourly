@@ -50,17 +50,18 @@ weather_daily_os/
 flowchart TD
     A[Start] --> B[Load .env Config]
     B --> C[Connect to PostgreSQL]
-    C --> D[SELECT station_id, lat, lon FROM tblWeather_station_tmd]
-    D --> E[Loop: each station]
-    E --> F[Call OpenWeather API (daily)]
+    C --> D[SELECT station_id, lat & lon from DB]
+    D --> E[Loop each station]
+    E --> F[Call OpenWeather API - daily]
     F --> G{API response OK?}
-    G -- Yes --> H[Extract daily[] forecast]
-    H --> I[Loop: each day]
-    I --> J[Transform & INSERT into tblWeather_daily_os]
-    J --> K[Commit]
+    G -- Yes --> H[Extract 'daily' array]
+    H --> I[Loop each day]
+    I --> J[Transform & Insert to tblWeather_daily_os]
+    J --> K[Commit to DB]
     K --> E
-    G -- No --> L[Log error + skip]
+    G -- No --> L[Log error & skip]
     L --> E
-    K --> M[Done]
+    E --> M[Done]
+
 ```
 
