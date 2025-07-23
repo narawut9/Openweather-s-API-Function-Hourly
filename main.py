@@ -132,7 +132,7 @@ for s in stations:
 # 5. Insert 
     try:
         sql_query = '''
-            INSERT INTO weather."tblWeather_daily_os"(
+            INSERT INTO weather."tblWeather_hourly_os"(
                 weather_station_id, obs_datetime, temp, temp_max, temp_min, 
                 feels_like, humidity, pressure, rain_1h, wind_speed, wind_gust, cloud_all, 
                 weather_main, weather_description, create_by, create_date, update_by, update_date)
