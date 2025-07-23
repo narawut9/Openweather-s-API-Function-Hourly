@@ -30,25 +30,25 @@ def get_weather_station_id_list(conn):
         cur.close()
 
         # แปลงเป็น list ของ dict
-        stations = []
+        stations = [] # list ว่างเปล่า เพื่อเก็บข้อมูล
         for r in rows:
             stations.append({
-                "weather_station_id": r[0],
-                "lat": r[1],
-                "lon": r[2]
+                "weather_station_id": r[0], # คอลัมน์ 1
+                "lat": r[1], # 2
+                "lon": r[2] # 3
             })
 
-        return stations
+        return stations # weather_station_id_list
 
     except Exception as e:
         print(f"[Error]: {e}")
         return []
 
-# stations = get_weather_station_list(conn)
+# # stations = get_weather_station_id_list(conn)
 
-# for station in stations:
-#     print(station)
-
+# # for s in stations:
+# #    print(s)
+# # print(f"Total weather stations fetched: {len(stations)}")
 
 # 3. ดึง weather daily
 def fetch_weather_daily (lat, lon):
@@ -68,10 +68,10 @@ def fetch_weather_daily (lat, lon):
         print(f"Error fetching station data from {weather_url}: {e}")
         return None
     except json.JSONDecodeError as e: 
-        print(f"Error fetching station data from {weather_url}: {e}")
+        print(f"Error decoding station data JSON from {weather_url}: {e}")
         return None
     except ValueError as e :
-        print(f"Error decoding station data JSON from {weather_url}: {e}")
+        print(f" JSONDecodeError  from {weather_url}: {e}")
         return None
     except Exception as e : 
         print(f"[Database ERROR] {e}")
@@ -84,6 +84,7 @@ update_date = datetime.now()
 
 stations = get_weather_station_id_list(conn) # จาก MS table
 
+count_stations = 0 
 for s in stations:
     try:
         weather_station_id = s["weather_station_id"]
@@ -116,7 +117,7 @@ for s in stations:
     try: pressure = float(weather_daily['main']['pressure'])
     except: pressure = None
     
-    try: rain_1h = float(weather_daily.get['rain']['1h']) # แก้ <------ หาโครงสร้าง JSON ที่มี rain 
+    try: rain_1h = float(weather_daily['rain']['1h']) # แก้ <------ หาโครงสร้าง JSON ที่มี rain 
     except: rain_1h = None
 
     try: wind_speed = float(weather_daily['wind']['speed'])
@@ -134,41 +135,45 @@ for s in stations:
     try: weather_description = str(weather_daily['weather'][0]['description'])
     except: weather_description = None
 
-    # print(weather_main)
+    # print(rain_1h)
     # print(f"{obs_datetime}, {temp}, {weather_main}, {weather_description}, {lat}, {lon}, {rain_1h}")
     
-# # Insert 
-#     # if weather_station_id != None:
-#     try:
-#         cur = conn.cursor()
-#         sql_query = '''
-#             INSERT INTO weather."tblWeather_daily_os"(
-#                 weather_station_id, obs_datetime, temp, temp_max, temp_min, 
-#                 feels_like, humidity, pressure, rain_1h, wind_speed, wind_gust, cloud_all, 
-#                 weather_main, weather_description, create_date, create_by, update_date, update_by)
-#             VALUES (
-#                 %s, %s, %s, %s, %s, 
-#                 %s, %s, %s, %s, %s, 
-#                 %s, %s, %s, %s, %s, 
-#                 %s, %s, %s
-#             );
-#         '''
-#         cur.execute(sql_query, (
-#             weather_station_id, obs_datetime, temp, temp_max, temp_min, 
-#             feels_like, humidity, pressure, rain_1h, wind_speed, wind_gust, cloud_all, 
-#             weather_main, weather_description, create_date, create_by ,update_date, update_by
-#         ))
-#         conn.commit()
-#         cur.close()
-#         print(f"Complete to insert weather. (WeatherStationID: {weather_station_id}, DateTime = {obs_datetime})")
-#         # print("ETL Completed")
-#     except Exception as e:
-#         print(e)
-        # print(f"Failed to insert WeatherStationID = {weather_station_id}: {e}")
+# 5. Insert 
+    try:
+        sql_query = '''
+            INSERT INTO weather."tblWeather_daily_os"(
+                weather_station_id, obs_datetime, temp, temp_max, temp_min, 
+                feels_like, humidity, pressure, rain_1h, wind_speed, wind_gust, cloud_all, 
+                weather_main, weather_description, create_by, create_date, update_by, update_date)
+            VALUES (
+                %s, %s, %s, %s, %s, 
+                %s, %s, %s, %s, %s, 
+                %s, %s, %s, %s, %s, 
+                %s, %s, %s
+            );
+        '''
+        cur = conn.cursor()
+        cur.execute(sql_query, (
+            weather_station_id, obs_datetime, temp, temp_max, temp_min, 
+	        feels_like, humidity, pressure, rain_1h, wind_speed, wind_gust, cloud_all, 
+	        weather_main, weather_description, create_by, create_date, update_by, update_date
+        ))
+        conn.commit()
+        cur.close()
+        count_stations += 1 # count
+        print(f"Complete to insert weather. (WeatherStationID: {weather_station_id}, DateTime = {obs_datetime})")
+    except Exception as e:
+        print(e)
+        print(f"Failed to insert WeatherStationID = {weather_station_id}: {e}")
 
-# if conn:
-#     try:
-#         conn.close()
-#         print("Database connection closed successfully.")
-#     except psycopg2.Error as e:
-#         print(f"Error closing database connection: {e}")
+
+print("ETL Completed")
+print(f"Total successful inserts: {count_stations}")
+
+if conn:
+    try:
+        conn.close()
+        print("Database connection closed successfully.")
+
+    except psycopg2.Error as e:
+        print(f"Error closing database connection: {e}")

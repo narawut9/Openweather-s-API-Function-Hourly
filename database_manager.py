@@ -22,4 +22,4 @@ def get_db_connection(DB_CONFIG):
         print(f"[ERROR] Failed to connect to Database : {e}")
         exit(1)
 
-get_db_connection(DB_CONFIG)
+# get_db_connection(DB_CONFIG)

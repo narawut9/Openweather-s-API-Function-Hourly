@@ -11,6 +11,5 @@ venv/
 
 # VS Code
 .vscode/
-
-main.py
 test.py
+t.text
