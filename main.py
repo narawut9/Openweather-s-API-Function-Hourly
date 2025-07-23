@@ -5,13 +5,12 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 from database_manager import get_db_connection ,DB_CONFIG
-from test import print_weather_data_types
+
 load_dotenv()
+
 # --- API_KEY ----
 API_KEY = os.getenv("API_KEY")
 
-# --- url ---
-# url = os.getenv("OPENWEATHER_API_KEY")
 
 # 1. Connect to DB
 conn = get_db_connection(DB_CONFIG)
@@ -44,11 +43,6 @@ def get_weather_station_id_list(conn):
         print(f"[Error]: {e}")
         return []
 
-# # stations = get_weather_station_id_list(conn)
-
-# # for s in stations:
-# #    print(s)
-# # print(f"Total weather stations fetched: {len(stations)}")
 
 # 3. ดึง weather daily
 def fetch_weather_daily (lat, lon):
@@ -117,7 +111,7 @@ for s in stations:
     try: pressure = float(weather_daily['main']['pressure'])
     except: pressure = None
     
-    try: rain_1h = float(weather_daily['rain']['1h']) # แก้ <------ หาโครงสร้าง JSON ที่มี rain 
+    try: rain_1h = float(weather_daily['rain']['1h']) 
     except: rain_1h = None
 
     try: wind_speed = float(weather_daily['wind']['speed'])
@@ -134,9 +128,6 @@ for s in stations:
     
     try: weather_description = str(weather_daily['weather'][0]['description'])
     except: weather_description = None
-
-    # print(rain_1h)
-    # print(f"{obs_datetime}, {temp}, {weather_main}, {weather_description}, {lat}, {lon}, {rain_1h}")
     
 # 5. Insert 
     try:
