@@ -1,7 +1,7 @@
 import json
 import requests
 import psycopg2
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 import os
 from database_manager import get_db_connection ,DB_CONFIG
@@ -73,8 +73,8 @@ def fetch_weather_daily (lat, lon):
 #  4. Extract Station (lat, lon)
 create_by = 'Narawut.T'
 update_by = 'Narawut.T'
-create_date = datetime.now()
-update_date = datetime.now()
+create_date = datetime.now(timezone.utc)
+update_date = datetime.now(timezone.utc)
 
 stations = get_weather_station_id_list(conn) # จาก MS table
 
@@ -90,7 +90,7 @@ for s in stations:
 
     weather_daily = fetch_weather_daily(lat, lon)
 
-    try: obs_datetime = datetime.fromtimestamp(weather_daily['dt'])
+    try: obs_datetime = datetime.fromtimestamp(weather_daily['dt'], tz=timezone.utc)
     except: obs_datetime = None
 
     try: temp = float(weather_daily['main']['temp'])
@@ -132,7 +132,7 @@ for s in stations:
 # 5. Insert 
     try:
         sql_query = '''
-            INSERT INTO weather."tblWeather_hourly_os"(
+            INSERT INTO weather."tblWeather_hourly_ow"(
                 weather_station_id, obs_datetime, temp, temp_max, temp_min, 
                 feels_like, humidity, pressure, rain_1h, wind_speed, wind_gust, cloud_all, 
                 weather_main, weather_description, create_by, create_date, update_by, update_date)
